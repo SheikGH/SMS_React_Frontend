@@ -1,0 +1,17 @@
+@import '~normalize.css';
+@import '~@blueprintjs/core/lib/css/blueprint.css';
+@import '~@blueprintjs/icons/lib/css/blueprint-icons.css';
+
+/* body{
+    display: flex;
+    justify-content: center;
+} */
+.center {
+    margin-left: auto;
+    margin-right: auto;
+    overflow-x: auto;
+}
+
+table tr th, tr td {
+    padding: 10px;
+}

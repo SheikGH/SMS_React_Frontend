@@ -1,0 +1,71 @@
+import React from "react";
+import StudentForm from "../../components/student/StudentForm";
+import FamilyMemberForm from "../../components/student/FamilyMemberForm";
+import { useParams } from "react-router";
+import CloseButton from "../../components/common/button/CloseButton";
+
+const StudentModal = ({ data, isEditMode, onSave, onClose, setIsModalOpen, userRole, onDelete, onApprove }) => {
+    console.log('StudentModal::userRole', data, isEditMode, userRole);
+    const { studentId } = useParams();
+    const approveStatus = "new"; //data.approveStatus
+    
+    // const handleSetData = (setValues) => {
+    //     const newData = {
+    //         firstName: 'John',
+    //         lastName: 'Doe',
+    //         email: 'john.doe@example.com',
+    //     };
+    //     setValues(newData); // Sets new data to the form
+    // };
+
+    // if (!data) return null;
+
+    return (
+        <div
+            style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "rgba(0,0,0,0.5)",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+            }}
+        >
+            <div
+                style={{
+                    background: "#fff",
+                    padding: "10px",
+                    borderRadius: "5px",
+                    minWidth: "90%",
+                    maxHeight:"100%"
+                }}
+            >
+                <div className='bp5-form-group1' style={{ width: '100%', flexDirection: 'row' }}>
+                    <div style={{ width: '95%', textAlign: 'right', float: 'left' }}><h1 style={{ width: '90%', textAlign: 'center' }}>Student Details</h1></div>
+                    <div style={{ width: '5%', textAlign: 'right', float: 'left' }}><CloseButton onClose={onClose} /></div>
+                </div>
+                <div style={{ clear: 'both', height: '1px', borderBottom: 'solid 2px gray' }}></div>
+                <div>
+                    <div style={{ float: 'left' }}><StudentForm student={data} isEditMode={isEditMode} onSave={onSave} role={userRole} /></div>
+                    <div style={{ float: 'left' }}><FamilyMemberForm data={data} isEditMode={isEditMode} setIsModalOpen={setIsModalOpen} role={userRole} /></div>
+                </div>
+                {/* <div style={{ clear: 'both', height: '10px', textAlign: 'center' }}>
+                    <div><button onClick={onClose}>Close</button></div>
+                </div> */}
+                <div style={{ clear: 'both', height: '5px', textAlign: 'center' }}></div>
+                <div className='bp5-form-group'>
+                    {isEditMode && userRole === "2" ? <button className='bp5-button bp5-intent-danger' type="button" onClick={() => onDelete(data.id)}>Delete</button> : ''}
+                </div>
+                <div className='bp5-form-group'>
+                    {isEditMode && userRole === "2" && approveStatus !== "approved"? <button className='bp5-button bp5-intent-danger' type="button" onClick={() => onApprove(data.id)}>Approve</button> : ''}
+                </div>
+                <div style={{clear:'both', height: '5px'}}></div>
+            </div>
+        </div>
+    );
+};
+
+export default StudentModal;
