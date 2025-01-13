@@ -11,28 +11,16 @@ import { selectStudentById, selectStudents } from '../../redux/selectors/student
 import { addStudent, editStudent, fetchStudentById } from '../../redux/actions/studentActions';
 
 const StudentForm = ({ student, isEditMode, onSave, role }) => {
-
-    // const { studentId } = useParams(); // Retrieve ID from URL for edit
-    const isDisabled = isEditMode && role !== "2"; //1.Admin, 2.Registrators
+    const disableButton = isEditMode ? !(isEditMode && role === "2") : false; //1.Admin, 2.Registrators
+    const [isDisabledButton, setIsDisabledButton] = useState(disableButton);
+    
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    // const students = useSelector(selectStudents);
-    // const student = useSelector(selectStudentById(state,, studentId));
-    // Use selector to get student data from the store
-    // const student = useSelector((state) => { return data ? data : selectStudentById(state, studentId) });
-    console.log('StudentForm::data:student:::', student, isEditMode, role);
+    // console.log('StudentForm::data:student:::', student, isEditMode, role);
     const [dataNationality, setDataNationality] = useState([]);
-    // const [initialValues, setInitialValues] = useState({
-    //     firstName: student?.firstName || '',
-    //     lastName: student?.lastName || '',
-    //     dateOfBirth: student?.dateOfBirth || '',
-    //     nationalityId: student?.dateOfBirth || 0,
-    //     nationality: {
-    //         id: 0,
-    //         name: ''
-    //     }
-    // });
 
+    // Get today's date in the format YYYY-MM-DD
+    const today = new Date().toISOString().split("T")[0];
 
     const validationSchema = Yup.object({
         // studentID: Yup.string().required('Student ID is required'),
@@ -44,101 +32,35 @@ const StudentForm = ({ student, isEditMode, onSave, role }) => {
         dateOfBirth: Yup.date().required('Date of Birth is required'),
     });
 
-    // const onSubmit1 = async (values, { resetForm }) => {
-    //     //2023-07-31T12:44:55.403Z
-    //     var updatedVal = values;
-    //     updatedVal.ID = studentId ? studentId : 0;
-    //     updatedVal.dateOfBirth = updatedVal.dateOfBirth ? updatedVal.dateOfBirth + 'T12:44:55.403Z' : '';
-    //     // updatedVal.dateOfBirth ='';
-    //     updatedVal.nationality = {
-    //         id: values.nationalityId,
-    //         name: ''
-    //     }
-    //     updatedVal = JSON.stringify(updatedVal);
-    //     console.log('onSubmit:', studentId, values, updatedVal);
-    //     console.log('Student Form Submitted:', values);
-    //     resetForm(); // Clears the form
-    //     if (studentId) {
-    //         await dispatch(editStudent(studentId, updatedVal));
-    //         // await updateStudent(studentId, updatedVal); // Update existing student
-    //     } else {
-    //         await dispatch(addStudent(updatedVal)); // Create new student
-    //     }
-    //     //navigate('/'); // Redirect to student list after submit
-    // };
-
     const formik = useFormik({
         initialValues: {
             id: student?.id || 0,
             firstName: student?.firstName || '',
             lastName: student?.lastName || '',
-            dateOfBirth: student?.dateOfBirth || '',
-            nationalityId: student?.dateOfBirth || '',
+            dateOfBirth: student?.dateOfBirth.split("T")[0] || '', //"2023-07-31T12:44:55.403Z" input => 1798-12-31T00:00:00"
+            nationalityId: student?.nationalityId || '',
             nationality: {
-                id: 0,
-                name: ''
+                id: student?.nationalityId,
+                name: student?.nationalityName
             }
         },
         validationSchema,
         // onSubmit,
         onSubmit: (values) => {
-            console.log('StudentForm:onSave', values);
+            // console.log('StudentForm:onSave', values);
+            setIsDisabledButton(true);
             onSave({ ...student, ...values });
         },
         enableReinitialize: true, // Reinitialize form when initialValues change
     });
 
-    // useEffect(() => {
-    //     if (studentId) {
-    //         console.log('initialValues0:', studentId, initialValues);
-    //         dispatch(fetchStudentById(studentId));
-    //         console.log('initialValues1:', student, initialValues);
-    //         student.dateOfBirth = student.dateOfBirth ? student.dateOfBirth.substring(0, 10) : ''
-    //         setInitialValues(student);
-    //         console.log('initialValues2:', student, initialValues);
-    //         // getStudentById(studentId).then(({ data }) => {
-    //         //     data.dateOfBirth = data.dateOfBirth ? data.dateOfBirth.substring(0, 10) : ''
-    //         //     setInitialValues(data);
-    //         //     console.log('initialValues:', data, initialValues);
-    //         // });
-    //     }
-    // }, [studentId]);
-    // Dispatch fetch action on component mount or if studentId changes
-
-    // useEffect(() => {
-    //     if (studentId) {
-    //         loadStudent();
-    //     }
-    // }, [dispatch]);
-
-    // const loadStudent = async () => {
-    //     try {
-    //         dispatch(fetchStudentById(studentId));
-
-    //     } catch (error) {
-    //         console.error('Error fetching data:', error);
-    //     } finally {
-
-    //     }
-    // };
-    // useEffect(() => {
-    //     if (student) {
-    //         student.dateOfBirth = student.dateOfBirth ? student.dateOfBirth.substring(0, 10) : ''
-    //         setInitialValues(student);
-    //         console.log('initialValues1:', student, initialValues);
-    //     }
-    // }, [student]);
-
     useEffect(() => {
-        axios
-            .get("/data/nationality.json")
+        //axios.get("/data/nationality.json")
+        axiosInstance.get('/Nationalities')
             .then((res) => { setDataNationality(res.data); })
             .catch((err) => console.log(err));
     }, []);
 
-    const handleAddClick = () => {
-
-    }
 
     // if (!student) {
     //     return <p>Loading...</p>;
@@ -147,23 +69,9 @@ const StudentForm = ({ student, isEditMode, onSave, role }) => {
     return (
         <div className="form-group">
             <div className='modal-body' style={{ textAlign: 'center' }}>
-                <div style={{height:'20px'}}><h2>{isEditMode ? 'Edit Student' : 'Add Student'}</h2></div>
+                <div style={{ height: '20px' }}><h2>{isEditMode ? 'Edit Student' : 'Add Student'}</h2></div>
                 <form onSubmit={formik.handleSubmit}>
                     <div className='bp5-form-row' style={{ display: 'block', width: 600, padding: 10, textAlign: 'left', marginLeft: '3%' }}>
-                        {/* <div>
-        <label className='bp5-form-group label bp5-label'>Student ID</label>
-        <input
-          type="text"
-          name="studentID"
-          value={formik.values.studentID}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-        />
-        {formik.touched.studentID && formik.errors.studentID && (
-          <div>{formik.errors.studentID}</div>
-        )}
-      </div> */}
-
                         <div className='bp5-form-group'>
                             <label className='bp5-form-group label bp5-label'>First Name</label>
                             <input
@@ -211,11 +119,12 @@ const StudentForm = ({ student, isEditMode, onSave, role }) => {
                         </div>
 
                         <div className='bp5-form-group'>
-                            <label className='bp5-form-group label bp5-label'>Date of Birth</label>
+                            <label className='bp5-form-group bp5-label'>Date of Birth</label>
                             <input
                                 type="date"
                                 name="dateOfBirth"
                                 value={formik.values.dateOfBirth}
+                                max={today} // Restricts future dates
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
                                 className="bp5-input"
@@ -224,11 +133,11 @@ const StudentForm = ({ student, isEditMode, onSave, role }) => {
                                 <div style={{ color: "red" }}>{formik.errors.dateOfBirth}</div>
                             )}
                         </div>
-                        <div style={{height:'70px'}}>
-                            
+                        <div style={{ height: '70px' }}>
+
                         </div>
                         <div className='bp5-form-group'>
-                            <button className='bp5-button bp5-intent-primary' type="submit" disabled={isDisabled}>{isEditMode ? 'Update' : 'Add'} Student</button>
+                            <button className='bp5-button bp5-intent-primary' type="submit" disabled={isDisabledButton}>{isEditMode ? 'Update' : 'Add'} Student</button>
                         </div>
                     </div>
                 </form>

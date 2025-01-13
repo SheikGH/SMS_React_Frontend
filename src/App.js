@@ -50,14 +50,17 @@ const App = () => {
               <div className="panel panel-default">
                 <div className="panel-body"></div>
                 <Routes>
-                  <Route path="/" element={<Student setToken={setToken} />} />
-                  <Route path="/student" element={<PrivateRoute token={token}><Student /></PrivateRoute>} />
+                  {/* <Route path="/" element={<Student setToken={setToken} />} /> 
+                  <Route path="/student" element={<PrivateRoute token={token}><Student /></PrivateRoute>} />*/}
+                  <Route path="/" element={<StudentLanding />} />
+                  <Route path="/studentlanding" element={<StudentLanding />} />
+                  <Route path="/student" element={<Student setToken={setToken} />} />
                   <Route path="/studentlist" element={<StudentList />} />
                   <Route path="/studentadd" element={<StudentForm />} />
                   <Route path="/studentedit/:studentId" element={<StudentForm />} />
                   <Route path="/familyadd" element={<FamilyMemberForm />} />
                   <Route path="/familyedit/:familyMemberId" element={<FamilyMemberForm />} />
-                  <Route path="/studentlanding" element={<StudentLanding />} />
+                  
                 </Routes>
               </div>
             </div>

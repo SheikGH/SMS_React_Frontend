@@ -6,14 +6,14 @@ import './menu.js'
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"></link>
 
 const Header = (props) => {
-  const { token, setToken, username, setUserName } = props;
+  // const { token, setToken, username, setUserName } = props;
 
-  const handleLogout = () => {
-    setToken('');
-    setUserName('');
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-  };
+  // const handleLogout = () => {
+  //   setToken('');
+  //   setUserName('');
+  //   localStorage.removeItem('token');
+  //   localStorage.removeItem('username');
+  // };
 
   return (
     <Fragment>
@@ -29,10 +29,11 @@ const Header = (props) => {
         <div style={{ clear: 'both' }}></div>
         <div className="topnav" id="myTopnav">
           <Link to="/" className="active">Home</Link>
-          <Link to="/studentlanding">Student</Link>
-          <Link to="/studentadd">Add Student</Link>
+          <Link to="/studentlanding">Student List 1</Link>
+          <Link to="/student">Student List 2</Link>
+          {/* <Link to="/studentadd">Add Student</Link>
           <Link to="/familyadd">Add Family Member</Link>
-          <Link to="/familyedit/1">Edit Family Member</Link>
+          <Link to="/familyedit/1">Edit Family Member</Link> */}
 
           {/* <div className="dropdown">
             <button className="dropbtn">Student

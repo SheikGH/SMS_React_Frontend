@@ -82,7 +82,7 @@ const StudentList = () => {
                 {students && students.length > 0 ?
                     (<Fragment>
                         <div>
-                            <table className='center'>
+                            <table className='center' border="1">
                                 <thead>
                                     <tr>
                                         <th>ID</th>

@@ -14,33 +14,26 @@ import { approveStudent } from "../../services/student/apiStudentService";
 Modal.setAppElement('#root');
 const AppToaster = Toaster.create({
     position: "top"
-  });
+});
 
 const StudentLanding = () => {
-    // const [isModalOpen, setIsModalOpen] = useState(false);
-    // const [selectedRowData, setSelectedRowData] = useState(null);
-
-    // const [students, setStudents] = useState([
-    //     { id: 1, firstName: 'John', lastName: 'Doe', age: 21 },
-    //     { id: 2, firstName: 'Jane', lastName: 'Smith', age: 22 },
-    //     { id: 3, firstName: 'Emily', lastName: 'Johnson', age: 20 },
-    // ]);
-
     const dispatch = useDispatch();
     const students = useSelector(selectStudents);
     // const [students, setStudents] = useState(useSelector(selectStudents));
     const [isLoading, setIsLoading] = useState(true);
-    useEffect(() => {
-        dispatch(fetchStudents());
-        setIsLoading(false);  // Set loading to false after data is fetched or error occurs
-    }, [dispatch]);
-
-    console.log('StudentLanding::students:', students);
+    // console.log('StudentLanding::students:', students);
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [dataRole, setDataRole] = useState([]);
-    const [userRole, setUserRole] = useState('');
+    const [userRole, setUserRole] = useState('1');
+    const [studentID, setStudentID] = useState(null);
+    const [isApproveDisabled, setIsApproveDisabled] = useState(false);
+
+    useEffect(() => {
+        dispatch(fetchStudents());
+        setIsLoading(false);  // Set loading to false after data is fetched or error occurs
+    }, [dispatch, isModalOpen]);
 
     useEffect(() => {
         axios
@@ -53,61 +46,92 @@ const StudentLanding = () => {
         setSelectedStudent(student);
         setIsEditMode(true);
         setIsModalOpen(true);
+        setIsApproveDisabled(false);
     };
 
     const handleAddStudent = () => {
         setSelectedStudent(null);
         setIsEditMode(false);
         setIsModalOpen(true);
+        setIsApproveDisabled(false);
     };
 
     const handleSave = async (values) => {
-        console.log('StudentLanding::handleSave:', values);
+        // console.log('StudentLanding::handleSave:', values);
         //2023-07-31T12:44:55.403Z
         var updatedVal = values;
-        // updatedVal.id = isEditMode ? values.id : 0;
         updatedVal.dateOfBirth = updatedVal.dateOfBirth ? updatedVal.dateOfBirth + 'T12:44:55.403Z' : '';
-        // updatedVal.dateOfBirth ='';
         updatedVal.nationality = {
             id: values.nationalityId,
             name: ''
         }
         updatedVal = JSON.stringify(updatedVal);
-        console.log('onSubmit:', values, updatedVal);
-        console.log('Student Form Submitted:', values);
         if (isEditMode) {
             // Update existing student
-            // setStudents(
-            //     students.map((s) => (s.id === student.id ? student : s))
-            // );
-            console.log('onSubmit::editStudent:', values.id, updatedVal);
-            await dispatch(editStudent(values.id, updatedVal));
+            // setStudents(  students.map((s) => (s.id === student.id ? student : s)) );
+            try {
+                const resultAction = await dispatch(editStudent(values.id, updatedVal));
+                // console.log('onSubmit::editStudent:', values.id, updatedVal);
+                AppToaster.show({
+                    message: "Student edited successfully",
+                    intent: "success",
+                    timeout: 3000
+                });
+            } catch (error) {
+                console.error('Failed to edit student:', error);
+            }
         } else {
             // Add new student
             // setStudents([...students, { ...student, id: students.length + 1 }]);
-            console.log('onSubmit::addStudent:', updatedVal);
-            await dispatch(addStudent(updatedVal)); // Create new student
+            try {
+                const resultAction = await dispatch(addStudent(updatedVal)); // Create new student
+                // alert('Inserted Student with ID:' + resultAction + resultAction.id);
+                // console.log('Inserted Student with ID:', resultAction, updatedVal);
+                setStudentID(resultAction.id);
+                AppToaster.show({
+                    message: "Student added successfully",
+                    intent: "success",
+                    timeout: 3000
+                });
+            } catch (error) {
+                console.error('Failed to add student:', error);
+            }
         }
         // setIsModalOpen(false);
     };
     const handleDelete = async (id) => {
-        await dispatch(deleteStudent(id));
-        await dispatch(deleteFamilyMemberBySID(id));
-        alert('handleDelete' + ' '+ id);
-        AppToaster.show({
-            message: "Student deleted sucessfully",
-            intent: "success",
-            timeout: 3000
-          });
+        try {
+            // await dispatch(deleteStudent(id));
+            await dispatch(deleteFamilyMemberBySID(id));
+            AppToaster.show({
+                message: "Student and Family member deleted successfully",
+                intent: "success",
+                timeout: 3000
+            });
+            setIsModalOpen(false);
+            await dispatch(fetchStudents());
+        } catch (error) {
+            console.error('Failed to delete student and family member:', error);
+        }
     }
+
     const handleApprove = async (id) => {
-        await dispatch(approveStudent(id));
-        alert('handleApprove' + ' '+ id);
-        AppToaster.show({
-            message: "Student approved sucessfully",
-            intent: "success",
-            timeout: 3000
-          });
+        try {
+            //if (!isEditMode) { return; }
+            setIsApproveDisabled(true);
+            setSelectedStudent((prevState) => ({
+                ...prevState,
+                status: "Approved",
+            }));
+            AppToaster.show({
+                message: "Student approved successfully",
+                intent: "success",
+                timeout: 3000
+            });
+            await dispatch(approveStudent(id));
+        } catch (error) {
+            console.error('Failed to approve student:', error);
+        }
     }
 
     if (isLoading) { return <div>Loading...</div>; } // Render a loader while waiting
@@ -118,10 +142,10 @@ const StudentLanding = () => {
             <div className="bp5-input-group" style={{ padding: '20px' }}>
                 <div style={{ width: '20%', float: 'left' }}>
                     <div className='bp5-form-group'>
-                        <label className='bp5-form-group label bp5-label' style={{ float: 'left', marginRight: '15px;' }}>Role:</label>
+                        <label className='bp5-form-group label bp5-label' style={{ float: 'left', marginRight: '15px;',textAlign:'left',fontWeight:'bold' }}>Role:</label>
                         <select style={{ float: 'left' }} name="roleId"
                             className="bp5-input"
-                            onChange={(e) => { setUserRole(e.target.value); console.log('setUserRole:', userRole) }}>
+                            onChange={(e) => { setUserRole(e.target.value); }}>
                             {/* <option key={0}>---select---</option> */}
                             {
                                 dataRole && dataRole.map((h, i) => (<option key={i} value={h.id}>{h.name}</option>))
@@ -143,9 +167,12 @@ const StudentLanding = () => {
                         onSave={handleSave}
                         onClose={() => setIsModalOpen(false)}
                         setIsModalOpen={setIsModalOpen}
-                        userRole={userRole} 
+                        userRole={userRole}
                         onDelete={handleDelete}
-                        onApprove={handleApprove}/>
+                        onApprove={handleApprove}
+                        setStudentID={setStudentID}
+                        studentID={studentID}
+                        isApproveDisabled={isApproveDisabled} />
                 </Modal>
                 {/* {isModalOpen && (
                 <StudentModal data={selectedRowData} onClose={handleCloseModal} />

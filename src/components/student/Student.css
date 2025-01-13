@@ -15,3 +15,21 @@
 table tr th, tr td {
     padding: 10px;
 }
+
+.table-collapse {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #ddd;
+  }
+  
+  .table-collapse th,
+  .table-collapse td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  .table-collapse th {
+    background-color: #f4f4f4;
+    text-align: left;
+  }
+  

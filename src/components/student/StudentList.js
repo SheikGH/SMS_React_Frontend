@@ -12,7 +12,7 @@ const AppToaster = Toaster.create({
 });
 
 const StudentList = ({ students, onRowClick }) => {
-  console.log('StudentList::onRowClick:', students, onRowClick);
+  // console.log('StudentList::onRowClick:', students, onRowClick);
   const dispatch = useDispatch();
   // const students = useSelector(selectStudents);
   // const [isLoading, setIsLoading] = useState(true);
@@ -55,7 +55,7 @@ const StudentList = ({ students, onRowClick }) => {
 
   const currentData = sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const requestSort = key => {
-    alert('requestSort');
+    // alert('requestSort');
     let direction = 'ascending';
     if (sortConfig.key === key && sortConfig.direction === 'ascending') {
       direction = 'descending';
@@ -73,8 +73,8 @@ const StudentList = ({ students, onRowClick }) => {
         {/* <Button intent='success' onClick={handleClick}>Add Student</Button> */}
         {students && students.length > 0 ?
           (<Fragment>
-            <div>
-              <table className='center' border="1" style={{ width: "100%", textAlign: "left" }}>
+            <div style={{paddingLeft:'20px',paddingRight:'20px'}}>
+              <table className='table-collapse' border="1" style={{ width: "100%", textAlign: "left" }}>
                 <thead>
                   <tr>
                     <th>ID</th>

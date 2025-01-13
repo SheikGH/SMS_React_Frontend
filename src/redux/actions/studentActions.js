@@ -19,11 +19,24 @@ export const fetchStudentById = (id) => async (dispatch) => {
   dispatch({ type: FETCH_STUDENT, payload: response.data });
 };
 
-export const addStudent = (student) => async (dispatch) => {
+export const addStudent1 = (student) => async (dispatch) => {
   const response = await api.createStudent(student);
+  console.log('api.createStudent(student):', response);
   dispatch({ type: ADD_STUDENT, payload: response.data });
 };
+export const addStudent = (student) => async (dispatch) => {
+  try {
+    const response = await api.createStudent(student);
+    console.log('api.createStudent(student):', response);
+    dispatch({ type: ADD_STUDENT, payload: response.data });
 
+    // Return the response data to the caller
+    return response.data;
+  } catch (error) {
+    console.error('Error adding student:', error);
+    throw error; // Re-throw the error so it can be handled
+  }
+};
 export const editStudent = (id, student) => async (dispatch) => {
   const response = await api.updateStudent(id, student);
   dispatch({ type: UPDATE_STUDENT, payload: response.data });
@@ -34,7 +47,23 @@ export const deleteStudent = (id) => async (dispatch) => {
   dispatch({ type: DELETE_STUDENT, payload: id });
 };
 
+export const approveStudent1 = (id) => async (dispatch) => {
+  const response = await api.approveStudent(id);
+  dispatch({ type: APPROVE_STUDENT, payload: response.data });
+};
 export const approveStudent = (id) => async (dispatch) => {
-  await api.approveStudent(id);
-  dispatch({ type: APPROVE_STUDENT, payload: id });
+  try {
+    const response = await api.approveStudent(id);
+    console.log('api.approveStudent(id):', response);
+    if (!response.ok) throw new Error('Failed to approve student');
+
+    const data = await response.json();
+    dispatch({ type: APPROVE_STUDENT, payload: data });
+
+    // Return the response data to the caller
+    return data;
+  } catch (error) {
+    console.error('Error aprroving student:', error);
+    throw error; // Re-throw the error so it can be handled
+  }
 };

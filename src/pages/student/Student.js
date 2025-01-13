@@ -14,13 +14,15 @@ const Student = () => {
     const [form, setForm] = useState({
         firstName: '',
         lastName: '',
-        dateOfBirth: ''
+        dateOfBirth: '',
+        nationalityId: 0,
     });
 
     const [errors, setErrors] = useState({
         firstName: '',
         lastName: '',
-        dateOfBirth: ''
+        dateOfBirth: '',
+        nationalityId: 0,
     });
 
     // const validateEmail = (email) => {
@@ -79,16 +81,18 @@ const Student = () => {
                 createStudent(JSON.stringify(trimJSONValues(form))).then(response => {
                     console.log('addStudent:', response.data);
                     const dataNew = {
-                        studentId: students.length + 1,//response.data.studentId,
+                        Id: students ? students.length + 1 : 0,//response.data.Id,
                         firstName: form.firstName,
                         lastName: form.lastName,
-                        dateOfBirth: form.dateOfBirth
+                        dateOfBirth: form.dateOfBirth,
+                        nationalityId: 0,
                     }
                     setStudents([...students, dataNew]);
                     setForm({
                         firstName: '',
                         lastName: '',
-                        dateOfBirth: ''
+                        dateOfBirth: '',
+                        nationalityId: 0,
                     });
 
                     AppToaster.show({
@@ -108,7 +112,7 @@ const Student = () => {
         //console.log('onChangeHandler:', id, key, value);
         setStudents((students) => {
             return students.map(user => {
-                return user.studentId === id ? { ...user, [key]: value } : user;
+                return user.Id === id ? { ...user, [key]: value } : user;
             })
         })
     }
@@ -140,7 +144,7 @@ const Student = () => {
     function updateUser(id) {
 
         //if (id > 10) id = 10;
-        const user = students.find((user) => user.studentId === id);
+        const user = students.find((user) => user.Id === id);
         if (id) {
             updateStudent(id, JSON.stringify(trimJSONValues(user)))
                 .then(response => {
@@ -180,7 +184,7 @@ const Student = () => {
                 if (response.status === 204) {
                     // console.log('Resource deleted successfully');
                     setStudents((students) => {
-                        return students.filter(user => user.studentId !== id)
+                        return students.filter(user => user.Id !== id)
                     })
                     AppToaster.show({
                         message: "Student deleted sucessfully",
@@ -255,17 +259,17 @@ const Student = () => {
                                 <tbody>
                                     {
                                         currentData.map(user =>
-                                            <tr key={user.studentId}>
-                                                <td>{user.studentId}</td>
-                                                <td><EditableText onChange={value => onChangeHandler(user.studentId, 'firstName', value)} value={user.firstName} /></td>
-                                                <td><EditableText onChange={value => onChangeHandler(user.studentId, 'lastName', value)} value={user.lastName} /></td>
-                                                <td><EditableText onChange={value => onChangeHandler(user.studentId, 'dateOfBirth', value)} value={new Date(user.dateOfBirth).toLocaleDateString().slice(0, 13)} /></td>
-                                                {/* <td><EditableText onChange={value => onChangeHandler(user.studentId, 'email', value)} value={user.email} /></td>
-                                <td><EditableText onChange={value => onChangeHandler(user.studentId, 'phone', value)} value={user.phone} /></td>
-                                <td><EditableText onChange={value => onChangeHandler(user.studentId, 'address', value)} value={user.address} /></td> */}
+                                            <tr key={user.Id}>
+                                                <td>{user.Id}</td>
+                                                <td><EditableText onChange={value => onChangeHandler(user.Id, 'firstName', value)} value={user.firstName} /></td>
+                                                <td><EditableText onChange={value => onChangeHandler(user.Id, 'lastName', value)} value={user.lastName} /></td>
+                                                <td><EditableText onChange={value => onChangeHandler(user.Id, 'dateOfBirth', value)} value={new Date(user.dateOfBirth).toLocaleDateString().slice(0, 13)} /></td>
+                                                {/* <td><EditableText onChange={value => onChangeHandler(user.Id, 'email', value)} value={user.email} /></td>
+                                <td><EditableText onChange={value => onChangeHandler(user.Id, 'phone', value)} value={user.phone} /></td>
+                                <td><EditableText onChange={value => onChangeHandler(user.Id, 'address', value)} value={user.address} /></td> */}
                                                 <td>
-                                                    <Button intent='primary' onClick={() => updateUser(user.studentId)}>Update</Button>&nbsp;
-                                                    <Button intent='danger' onClick={() => deleteUser(user.studentId)}>Delete</Button>
+                                                    <Button intent='primary' onClick={() => updateUser(user.Id)}>Update</Button>&nbsp;
+                                                    <Button intent='danger' onClick={() => deleteUser(user.Id)}>Delete</Button>
                                                 </td>
                                             </tr>
                                         )

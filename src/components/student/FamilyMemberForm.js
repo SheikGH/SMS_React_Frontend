@@ -3,26 +3,31 @@ import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { Button, Toaster } from '@blueprintjs/core';
 import { json, useNavigate, useParams } from 'react-router-dom';
 import { getFamilyMemberById, createFamilyMember, updateFamilyMember, addFamilyMemberBySID, } from '../../services/student/apiFamilyMemberService';
 import axiosInstance from '../../axiosConfig';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectFamilyMember, selectFamilyMemberById, selectFamilyMemberBySID, selectFamilyMembers } from '../../redux/selectors/familyMemberSelectors';
+import { selectStudents, selectStudent, selectStudentById } from '../../redux/selectors/studentSelectors';
 import { addFamilyMember, editFamilyMember, fetchFamilyMemberById, fetchFamilyMemberByStudentId } from '../../redux/actions/familyMemberActions';
+const AppToaster = Toaster.create({
+    position: "top"
+});
 
-const FamilyMemberForm = ({ data, isEditMode, setIsModalOpen, role }) => {
-    // const { familyMemberId } = useParams(); // Retrieve ID from URL for edit
-    // const familyMemberId = data ? data.ID : null;
-    const familyMemberId = null;
-    const studentId = data && data.id ? data.id : 0;
-    console.log('FamilyMemberForm:', studentId, data, isEditMode);
-    const isDisabled = isEditMode && role !== "2"; //1.Admin, 2.Registrators
+const FamilyMemberForm = ({ data, isEditMode, setIsModalOpen, role, setStudentID, newStudentID }) => {
+    const studentId = isEditMode ? (data && data.id ? data.id : null) : (newStudentID ? newStudentID : null);
+    // alert('FamilyMemberForm: ' + studentId);
+    // console.log('FamilyMemberForm:', studentId, data, isEditMode, newStudentID);
+    const disableButton = isEditMode ? !(isEditMode && role === "2") : false; //1.Admin, 2.Registrators
+    const [isDisabled, setIsDisabled] = useState(disableButton); //1.Admin, 2.Registrators
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const prevFamilyMember = useRef();
     const [dataNationality, setDataNationality] = useState([]);
     const [dataRelationship, setDataRelationship] = useState([]);
-
+    const studentsSelector = useSelector(selectStudents);
+    const studentSelector = useSelector(selectStudents);
     // Use `useSelector` to fetch data from Redux
     // Use selector to get familyMember data from the store
     // const familyMember = useSelector((state) => (selectFamilyMemberBySID(state, studentId)));
@@ -44,7 +49,8 @@ const FamilyMemberForm = ({ data, isEditMode, setIsModalOpen, role }) => {
 
     const loadFamilyMember = async () => {
         try {
-            dispatch(fetchFamilyMemberByStudentId(studentId));
+            if (studentId)
+                dispatch(fetchFamilyMemberByStudentId(studentId));
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
@@ -60,32 +66,16 @@ const FamilyMemberForm = ({ data, isEditMode, setIsModalOpen, role }) => {
         dateOfBirth: '',
         nationalityId: '',
         relationshipId: '',
-        studentId: 0,
-        // student: {
-        //     id: 0,
-        //     firstName: '',
-        //     lastName: '',
-        //     dateOfBirth: '',
-        //     nationalityId: 0,
-        //     nationality: {
-        //         id: 0,
-        //         name: ''
-        //     }
-        // },
-        // relationship: {
-        //     id: 0,
-        //     name: '',
-        // },
-        // nationality: {
-        //     id: 0,
-        //     name: ''
-        // }
+        studentId: '',
     };
     // Merge Redux data with default values (handle missing fields)
-    const initialValues = familyMember || defaultValues;
+    const familyMemberId = familyMember && familyMember.students && familyMember.students.student && familyMember.students.student.ID ? familyMember.students.student.ID : '';
+    const initialValues = familyMember && familyMember.familyMembers && familyMember.familyMembers.familyMember || defaultValues;
+    const formatDOB = initialValues && initialValues.dateOfBirth ? initialValues.dateOfBirth.split("T")[0] : '';
+    initialValues.dateOfBirth = formatDOB && formatDOB !== '' ? formatDOB : '';
     // const [initialValues, setInitialValues] = useState(familyMember || defaultValues);
     // console.log('initialValues00:', initialValues);
-    console.log('useSelector:initialValues::', familyMember, initialValues);
+    // console.log('useSelector:initialValues::', initialValues, initialValues.dateOfBirth, studentId);
     const validationSchema = Yup.object({
         // familyMemberID: Yup.string().required('FamilyMember ID is required'),
         firstName: Yup.string().required('First Name is required'),
@@ -95,46 +85,52 @@ const FamilyMemberForm = ({ data, isEditMode, setIsModalOpen, role }) => {
         relationshipId: Yup.string().required('Relationship is required'),
     });
 
-
-
-    // Set Formik values once student data is loaded
-    // useEffect(() => {
-    //     if (familyMember) {
-    //         if (prevFamilyMember.current !== familyMember) {
-    //             familyMember.dateOfBirth = familyMember.dateOfBirth ? familyMember.dateOfBirth.substring(0, 10) : ''
-    //             formik.setValues(familyMember);
-    //             console.log('initialValues1:', familyMember, initialValues);
-    //             prevFamilyMember.current = familyMember;
-    //         }
-    //         // if (JSON.stringify(formik.values) !== JSON.stringify(familyMember)) {
-    //         //     formik.setValues(familyMember);
-    //         // }
-    //         // formik.setValues({
-    //         //     ID: familyMember.ID || 0,
-    //         //     firstName: familyMember.firstName || "",
-    //         //     lastName: familyMember.lastName || "",
-    //         //     dateOfBirth: familyMember.dateOfBirth || "",
-    //         //     nationalityId: familyMember.nationalityId || 0,
-    //         //     relationshipId: familyMember.relationshipId || 0,
-    //         //     studentId: familyMember.studentId || 0,
-    //         // });
-    //     }
-    // }, [familyMember]); //[familyMember, formik]
+    // Get today's date in the format YYYY-MM-DD
+    const today = new Date().toISOString().split("T")[0];
 
     const onSubmit = async (values) => {
+        // console.log('selectStudent', studentsSelector, studentSelector)
+        // alert('studentId:' + studentId);
+        if (!studentId) { alert('Student data is required to add a family member!'); return; }
         //2023-07-31T12:44:55.403Z
         var updatedVal = values;
-        const studentId = updatedVal.studentId !== 0 ? updatedVal.studentId : 1;
+        // const studentId = updatedVal.studentId !== 0 ? updatedVal.studentId : 1;
         updatedVal.id = values.id ? values.id : 0;
         updatedVal.dateOfBirth = updatedVal.dateOfBirth ? updatedVal.dateOfBirth + 'T12:44:55.403Z' : '';
         updatedVal = JSON.stringify(updatedVal);
-        console.log('FamilyMemberForm::onSubmit:', familyMemberId, values, updatedVal);
+        // console.log('FamilyMemberForm::onSubmit:', familyMemberId, values, updatedVal);
         if (isEditMode) {
-            await dispatch(editFamilyMember(values.id, updatedVal));
-            // await updateFamilyMember(familyMemberId, updatedVal); // Update existing familyMember
+            try {
+                await dispatch(editFamilyMember(values.id, updatedVal));
+                // await updateFamilyMember(familyMemberId, updatedVal); // Update existing familyMember
+                AppToaster.show({
+                    message: "Family member edited successfully",
+                    intent: "success",
+                    timeout: 3000
+                });
+            } catch (error) {
+                console.error('Failed to edit family member:', error);
+            }
+
         } else {
-            await dispatch(addFamilyMemberBySID(studentId, updatedVal)); // Create new familyMember
+            if (!studentId) {
+                alert('Please add student before add a family member!');
+                return;
+            }
+
+            try {
+                await dispatch(addFamilyMemberBySID(studentId, updatedVal)); // Create new familyMember
+                setStudentID(null);
+                AppToaster.show({
+                    message: "Family member added successfully",
+                    intent: "success",
+                    timeout: 3000
+                });
+            } catch (error) {
+                console.error('Failed to add family member:', error);
+            }
         }
+        setIsDisabled(true);
         setIsModalOpen(false);
         //navigate('/'); // Redirect to familyMember list after submit
     };
@@ -148,15 +144,14 @@ const FamilyMemberForm = ({ data, isEditMode, setIsModalOpen, role }) => {
 
 
     useEffect(() => {
-        axios
-            .get("/data/nationality.json")
+        //axios.get("/data/nationality.json")
+        axiosInstance.get('/Nationalities')
             .then((res) => { setDataNationality(res.data); })
             .catch((err) => console.log(err));
     }, []);
 
     useEffect(() => {
-        axios
-            .get("/data/relationship.json")
+        axios.get("/data/relationship.json")
             .then((res) => { setDataRelationship(res.data); })
             .catch((err) => console.log(err));
     }, []);
@@ -168,23 +163,9 @@ const FamilyMemberForm = ({ data, isEditMode, setIsModalOpen, role }) => {
     return (
         <div className="form-group">
             <div className='modal-body' style={{ textAlign: 'center' }}>
-            <div style={{height:'20px'}}><h2>{isEditMode ? 'Edit Family Member' : 'Add Family Member'}</h2></div>
+                <div style={{ height: '20px' }}><h2>{isEditMode ? 'Edit Family Member' : 'Add Family Member'}</h2></div>
                 <form onSubmit={formik.handleSubmit}>
                     <div className='bp5-form-row' style={{ display: 'block', width: 600, padding: 10, textAlign: 'left', marginLeft: '3%' }}>
-                        {/* <div>
-        <label className='bp5-form-group label bp5-label'>FamilyMember ID</label>
-        <input
-          type="text"
-          name="familyMemberID"
-          value={formik.values.familyMemberID}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-        />
-        {formik.touched.familyMemberID && formik.errors.familyMemberID && (
-          <div>{formik.errors.familyMemberID}</div>
-        )}
-      </div> */}
-
                         <div className='bp5-form-group'>
                             <label className='bp5-form-group label bp5-label'>First Name</label>
                             <input
@@ -252,6 +233,7 @@ const FamilyMemberForm = ({ data, isEditMode, setIsModalOpen, role }) => {
                                 type="date"
                                 name="dateOfBirth"
                                 value={formik.values.dateOfBirth}
+                                max={today} // Restricts future dates
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
                                 className="bp5-input"

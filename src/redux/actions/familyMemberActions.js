@@ -19,7 +19,8 @@ export const fetchFamilyMemberById = (id) => async (dispatch) => {
   dispatch({ type: FETCH_FAMILY_MEMBER, payload: response.data });
 };
 export const fetchFamilyMemberByStudentId = (id) => async (dispatch) => {
-  const response = await api.fetchFamilyMemberByStudentId(id);console.log('fetchFamilyMemberByStudentId:',response);
+  const response = await api.fetchFamilyMemberByStudentId(id);
+  console.log('fetchFamilyMemberByStudentId:',response);
   dispatch({ type: FETCH_FAMILY_MEMBER_SID, payload: response.data });
 };
 
