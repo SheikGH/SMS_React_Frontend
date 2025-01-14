@@ -1,3 +1,26 @@
+Frontend – React.js with Redux
+Change React Application Site Url in the .env file
+ 
+Run ‘npm start’ command in the Terminal. It will automatically create node_module files in the react application
+ 
+Landing Page: 
+•	Landing page is displaying students list. Once click student item row it will open Model is Detail Page
+•	It has Role selection dropdown and Add Student button
+•	Once Admin enter the Student data. It will display in Landing page.
+ 
+  
+Detail Page:
+Stage 1: 
+•	User Registrars  can edit Student and Family Member datas
+•	They can Approve Student Details
+ 
+Stage 2:
+Once approve the student details. We can edit or delete the student and family member
+ 
+Stage 3:
+•	Once done Approve or Edit or Delete. Page will redirect to Landing page
+•	Landing page will display updated student lists
+ 
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
