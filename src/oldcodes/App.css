@@ -1,27 +1,18 @@
-/* .App {
-  text-align: center;
-} */
-/* Make App a flex column container */
 .App {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
   text-align: center;
 }
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
 }
-/* Allow the page-wrapper to grow and shrink as needed */
-#page-wrapper {
-  flex: 1 0 auto;
-  overflow-y: auto; /* Optional: add scrolling if content overflows */
-}
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
 }
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -58,11 +49,7 @@ body {
   padding: 0px;
   overflow-x: hidden;
 }
-/* Apply this to the root or body level */
-html, body, #root {
-  height: 100%;
-  margin: 0;
-}
+
 /* Scroll Bar */
 
 ::-webkit-scrollbar-track {
@@ -170,15 +157,12 @@ nav {
 }
 
 /* Footer */
-/* Footer stays at the bottom */
 footer {
-  /* margin-top: 8rem; */
-  flex-shrink: 0;
+  margin-top: 8rem;
   color: grey;
   bottom: 0;
   width: 100%;
 }
-
 
 /* Ratings */
 
