@@ -1,4 +1,31 @@
 Frontend – React.js with Redux
+
+GitHub Repo:
+📦 https://github.com/SheikGH/SMS_React_Frontend.git
+🔧 Prerequisites
+•	Node.js v16+
+•	npm or yarn
+________________________________________
+🪜 Frontend Setup Steps
+1. Clone the Repository
+git clone https://github.com/SheikGH/SMS_React_Frontend.git
+cd SMS_React_Frontend
+
+2. Install Dependencies
+npm install
+
+3. Check API URL
+Open .env file or wherever the base API URL is set, and verify:
+REACT_APP_API_URL=http://localhost:5071/api
+
+Change React Application Site Url in the .env file
+ 
+4. Run the React App
+npm start
+
+----------------------------------------------------------------------------
+Run ‘npm start’ command in the Terminal. It will automatically create node_module files in the react application
+
 Change React Application Site Url in the .env file
  
 Run ‘npm start’ command in the Terminal. It will automatically create node_module files in the react application
